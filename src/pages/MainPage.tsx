@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Card from "../components/Card";
 import Navbar from "../components/Navbar";
 import TestimonyCard from "../components/TestimonyCard";
 import logo from "../imgs/logo.png"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faHouse } from '@fortawesome/free-solid-svg-icons'
+import { faHouse, faL } from '@fortawesome/free-solid-svg-icons'
 import { faPhone } from '@fortawesome/free-solid-svg-icons'
 import { faEnvelope } from '@fortawesome/free-solid-svg-icons'
 import { faInstagram } from '@fortawesome/free-brands-svg-icons'
@@ -12,6 +12,7 @@ import { faFacebook } from '@fortawesome/free-brands-svg-icons'
 import { faTiktok } from '@fortawesome/free-brands-svg-icons'
 import CardButton from "../components/CardButton";
 import ImageBox from "../components/ImageBox";
+import { useSpring,animated } from "@react-spring/web";
 
 const MainPage = () => {
 
@@ -25,19 +26,71 @@ const MainPage = () => {
         setIsPaused(false)
     }
 
+
+
+    const [toggled,setToggled] = useState<boolean>(false)
+    const images = useRef(null)
+
+
+
+
+    useEffect(()=>{
+        const observer = new IntersectionObserver(
+            ([entry]) =>{
+                setToggled(entry.isIntersecting)
+            },
+            {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.2
+            }
+            
+        )
+        observer.observe(images.current)
+
+    },[])
+
+
+    const heroAnimOnLoad = useSpring({
+        from: {transform: 'translateY(-100px) ' ,},
+        to: {transform: 'translateY(0px) '},
+        config:{mass:2}
+    })
+    const logoOnLoad = useSpring({
+        from: {transform: 'rotateY(360deg) scale(0.0)' ,},
+        to: {transform: 'rotateY(0deg) scale(1)'},
+        config:{mass:3}
+    })
+
+    const sectionOnLoadFromLeft = useSpring({
+        from: {transform: 'translateX(-200px)' ,},
+        to: {transform: 'translateX(0px)'},
+        config:{mass:2}
+    })
+    const sectionOnLoadFromRight = useSpring({
+        from: {transform: 'translateX(200px)' ,},
+        to: {transform: 'translateX(0px)'},
+        config:{mass:2}
+    })
+
+    const imagesTurn = useSpring({
+        transform: toggled ? 'translateY(0px)' : 'translateY(200px)',
+    })
+
+
     return ( 
         <div className="flex flex-col align-middle items-center">
             <Navbar buttonRef1={'#introduction'} buttonRef2={'#testimony'} buttonRef3={'#contact'} buttonref4={'#gallery'}/>
             <div id='introduction' className="mt-5 pl-32 pr-32 w-full max-w-[2000px] flex flex-col">
                 <div  className="flex flex-col justify-center items-center mt-0 bg-white h-[25vh] pt-[100px]">
-                    <h1 className="text-black font-arvo text-6xl font-extralight text-center">Danny's Tires</h1>
-                    <img className="mt-2 w-12 h-12 inline-" src={logo} alt="" />
+                    <animated.h1 style={heroAnimOnLoad} className="text-black font-arvo text-6xl font-extralight text-center">Danny's Tires</animated.h1>
+                    <animated.img style={logoOnLoad} className="mt-2 w-12 h-12 inline-" src={logo} alt="" />
                 </div>
                 {/* <hr className=" items-center border border-black w-full mb-0"/> */}
                 <div className="flex flex-col w-full items-center pl-[150px] pr-[100px]">
                     <div className="flex flex-col justify-end w-2/3 max-w-[1200px] p-10  rounded-md font-montserrat mt-15">
-                        <h2 className="text-center font-light text-4xl mb-10">Our Mission</h2>
-                        <h2 className="text-2xl font-extralight text-center">At Danny's tires, we are dedicated to providing top-notch automotive repair and maintenance services to keep your vehicle running smoothly. With years of experience in the industry, our skilled technicians are equipped to handle everything from routine oil changes to complex engine repairs.</h2>
+                        <animated.h2 style={sectionOnLoadFromLeft} className="text-center font-light text-4xl mb-10">Our Mission</animated.h2>
+                        <animated.h2 style={sectionOnLoadFromRight} className="text-2xl font-extralight text-center">At Danny's tires, we are dedicated to providing top-notch automotive repair and maintenance services to keep your vehicle running smoothly. With years of experience in the industry, our skilled technicians are equipped to handle everything from routine oil changes to complex engine repairs.</animated.h2>
                     </div>
                 </div>
             </div>
@@ -99,9 +152,9 @@ const MainPage = () => {
             </div>
                 
             <div id="gallery" className=" flex flex-col items-center w-full bg-blue-300 pt-10 pb-14">
-                <div className="w-full max-w-[1500px]">
+                <div  ref={images} className="w-full max-w-[1500px]">
                     <h2 className="text-center font-montserrat text-4xl font-light">Gallery</h2>   
-                    <div className="mt-8">
+                    <animated.div style={imagesTurn} className="mt-8">
                         <ul className="flex flex-grid">
                             <ImageBox imgsource="https://www.uniteautomotive.com/image/catalog/blog/the-right-equipment-and-premises-to-start-an-auto-repair-workshop.jpg"/>
                             <ImageBox imgsource="https://media.cnn.com/api/v1/images/stellar/prod/220721175751-woman-mechanic-stock.jpg?c=original"/>
@@ -114,7 +167,7 @@ const MainPage = () => {
                             <ImageBox imgsource="https://www.eddiesrepairshop.com/custom/eddiesrepairbanner.jpg"/>
                             <ImageBox imgsource="https://www.lendio.com/wp-content/uploads/2020/03/iStock-181064136-scaled.jpg"/>
                         </ul>
-                    </div>
+                    </animated.div>
                 </div>
             </div>
 
